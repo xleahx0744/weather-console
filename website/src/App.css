@@ -1,0 +1,50 @@
+@import 'tailwindcss';
+
+.scrollbar-width-0 {
+    scrollbar-width: none;
+}
+
+.normal {
+    color: green;
+}
+
+.minor {
+    color: yellow;
+}
+
+.moderate {
+    color: orange;
+    animation: blink 3s infinite;
+}
+
+.severe {
+    color: red;
+    animation: blink 2s infinite;
+}
+
+.extreme {
+    color: purple;
+    animation: blink 1s infinite;
+}
+
+.reverse {
+    direction: rtl;
+}
+
+.blink-1 {
+    animation: blink 1s infinite;
+}
+
+.blink-2 {
+    animation: blink 2s infinite;
+}
+
+.blink-3 {
+    animation: blink 3s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1}
+    50% { opacity: 0.5}
+    100% { opacity: 1}
+}

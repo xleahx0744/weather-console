@@ -1,0 +1,34 @@
+import './App.css'
+import Sidebar from './sidebar'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import HomePage from './pages/homepage'
+import RiskScore from './pages/riskscore'
+import SevereWeather from './pages/severeweather'
+import { SettingsProvider } from './context/settings';
+import SettingsPage from './pages/settings'
+
+function AppComponent() {
+  return (
+    <section className='bg-gray-950 h-screen overflow-clip'>
+      <Sidebar />
+      <Routes>
+        <Route path='/' element={<HomePage />} />
+        <Route path='/risk' element={<RiskScore/>} />
+        <Route path='/severe-weather' element={<SevereWeather />} />
+        <Route path='/settings' element={<SettingsPage />} />
+      </Routes>
+    </section>
+  )
+}
+
+function App() {
+  return (
+    <SettingsProvider>
+      <Router>
+        <AppComponent />
+      </Router>
+    </SettingsProvider>
+  )
+}
+
+export default App
