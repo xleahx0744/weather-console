@@ -174,7 +174,7 @@ const calculateRisk = (data) => {
 
     // Calculate final score and apply a hard cap of 100
     let finalRiskScore = parseFloat((rawNationalEnergy * densityModifier).toFixed(2));
-    finalRiskScore = Math.min(100, finalRiskScore); 
+    finalRiskScore = finalRiskScore; 
 
     // --- Step 4: Save depth info for reporting ---
     const inDepthRisk = {
