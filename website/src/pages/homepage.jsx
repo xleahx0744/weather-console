@@ -336,13 +336,13 @@ export default function HomePage() {
                                         A tornado warning is issued when a tornado has been sighted or indicated by weather radar. It means that there is an imminent threat to life and property, and people in the affected area should take immediate action to seek shelter and protect themselves from the dangerous weather conditions.
                                     </p>
                                     <p className="p-2 text-gray-300">Tornado Warnings have a damage tag associated to them. They indicate the potential for significant damage to structures and life. These are the damage tags:</p>
-                                    <ul className="list-disc list-inside text-gray-400">
+                                    <ul className="text-gray-400 bg-gray-900/30 p-2 rounded-md">
                                         <li className="mb-2"><span className="font-bold text-yellow-300">BASE: </span>A normal tornado warning, if a tornado is on the ground it is not causing a lot of destruction. THIS DOES NOT MEAN IT IS SAFE! ALWAYS SHELTER IF A TORNADO WARNING IS ISSUED!</li>
                                         <li className="mb-2"><span className="font-bold text-orange-300">CONSIDERABLE: </span>A tornado is on the ground and poses a significant threat to life and property.</li>
                                         <li className="mb-2"><span className="font-bold text-red-300">CATASTROPHIC: </span>A violent tornado is on the ground and is expected to cause catastrophic damage and loss of life. These warnings are usually upgraded to a Tornado Emergency.</li>
                                     </ul>
                                     <p className="p-2 text-gray-300">Tornado Warnings also have a SOURCE tag that indicates how the tornado was detected.</p>
-                                    <ul className="list-disc list-inside text-gray-400">
+                                    <ul className="text-gray-400 bg-gray-900/30 p-2 rounded-md">
                                         <li className="mb-2"><span className="font-bold text-yellow-300">RADAR INDICATED: </span>A tornado was identified by weather professionals using doppler radar. This does not mean a tornado is on the ground, but should be treated just the same. ALWAYS TAKE SHELTER IN A TORNADO WARNING!</li>
                                         <li className="mb-2"><span className="font-bold text-red-300">CONFIRMED: </span>A tornado has been confirmed by weather spotters, emergency personnel, or other reliable sources. This means a tornado is actively on the ground.</li>
                                     </ul>
@@ -365,7 +365,7 @@ export default function HomePage() {
                                         A severe thunderstorm warning is issued when a severe thunderstorm is expected or occurring. It means that there is an imminent threat to life and property, and people in the affected area should take immediate action to seek shelter and protect themselves from the dangerous weather conditions.
                                     </p>
                                     <p className="p-2 text-gray-300">Severe Thunderstorm Warnings have a damage tag associated to them. They indicate the potential for significant damage to structures and life. These are the damage tags:</p>
-                                    <ul className="list-disc list-inside text-gray-400">
+                                    <ul className="text-gray-400 bg-gray-900/30 p-2 rounded-md">
                                         <li className="mb-2"><span className="font-bold text-yellow-300">BASE: </span>A normal severe thunderstorm warning, if the storm is producing damaging winds of 58MPH and higher or large hail of 1.00 inch and higher.</li>
                                         <li className="mb-2"><span className="font-bold text-orange-300">CONSIDERABLE: </span>A severe thunderstorm is producing large hail of 1.75 inches and higher or damaging winds of 70MPH and higher.</li>
                                         <li className="mb-2"><span className="font-bold text-red-300">DESTRUCTIVE: </span>A severe thunderstorm is producing extremely large hail of 2.50 inches and higher or devastating winds of 80MPH and higher.</li>
