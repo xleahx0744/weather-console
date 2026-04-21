@@ -48,3 +48,9 @@
     50% { opacity: 0.5}
     100% { opacity: 1}
 }
+
+.bg-weather-storm {
+    background-image: url('/storm.jpg');
+    background-size: cover;
+    background-position: center;
+}

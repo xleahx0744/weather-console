@@ -5,11 +5,11 @@ const { compareAndStore } = require('./comparison.service')
 
 const ingestAlerts = async () => {
 
-    const TRACKED_STATES = ['KY', 'OH', 'IN', 'NY', 'PA', 'WV', 'VA', 'MD', 'DE', 'NJ'];
+    const TRACKED_STATES = ['KY', 'OH', 'IN'];
     const endpoint = TRACKED_STATES.join(',')
 
     try {
-        const res = await fetch(`https://api.weather.gov/alerts/active`); // ?area=${endpoint}
+        const res = await fetch(`https://api.weather.gov/alerts/active?area=${endpoint}`); // ?area=${endpoint}
         if (!res.ok) {
             console.error('Failed to fetch alerts:', res.statusText);
             return;
@@ -19,7 +19,7 @@ const ingestAlerts = async () => {
         if (!data == []) {
             console.clear()
             setRisk(calculateRisk(data))
-            // await compareAndStore();
+            await compareAndStore();
         } else {
             console.clear()
             console.log('No alerts')

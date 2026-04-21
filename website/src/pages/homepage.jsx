@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import useInterval from "../hooks/useInterval";
-import { useSettings } from "../context/settings";
+import { useSettings } from "../hooks/useSettings.js";
 
 const riskToCategory = (risk) => {
     if (risk < 30) return 'Normal';
@@ -17,28 +17,26 @@ export default function HomePage() {
     const [data, setData] = useState([]);
     const [changes, setChanges] = useState([]);
     const [oldRisk, setOldRisk] = useState(0);
+    const [showInfoId, setShowInfoId] = useState(null);
 
-    const { settings } = useSettings();
+    const defaultSettings = useSettings().settings;
+
+    const settings = localStorage.getItem('userSettings') ? JSON.parse(localStorage.getItem('userSettings')) : defaultSettings;
 
     const fetchInfo = async () => {
         const response = await fetch('http://localhost:8000/info/risk');
         const data = await response.json();
         setData(data);
         setChanges(data.changes ?? []);
-        
-
-        if (riskToCategory(data.risk) === 'Extreme' && riskToCategory(oldRisk) !== 'Extreme') {
-            new Audio("/tornadoAlert.wav").play();
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance(`The weather risk score has reached extreme levels. The current risk is ${(data.risk).toFixed(2)} percent. Full monitoring mode is recommended. Please check the console for more details.`));
-        }
 
         setOldRisk(data.risk);
     }
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchInfo();
         setOldRisk(data.risk);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     }, [data.risk])
 
     const sortData = (data) => {
@@ -93,10 +91,13 @@ export default function HomePage() {
 
         if (e.includes("tornado warning"))
             return "bg-[#cc0000] border-[#ff0000] text-white";
+
         if (e.includes("tornado watch"))
             return "bg-[#ffcc00] border-[#ffff00] text-black";
+
         if (e.includes('tornado emergency'))
             return "bg-[#d234eb] border-[#e246fa] text-black";
+
         if (e.includes("severe thunderstorm warning"))
             return "bg-[#ff9900] border-[#ffcc00] text-black";
 
@@ -115,23 +116,20 @@ export default function HomePage() {
         if (e.includes('special weather statement'))
             return "bg-[#af25cf] border-[#b855cf] text-white";
 
-        if (e.includes('high wind warning') || e.includes('wind advisory')) {
+        if (e.includes('high wind warning') || e.includes('wind advisory'))
             return "bg-[#999966] border-[#cccc66] text-black";
-        }
-        if (e.includes('winter weather') || e.includes('ice storm') || e.includes('winter storm')) {
+
+        if (e.includes('winter weather') || e.includes('ice storm') || e.includes('winter storm'))
             return "bg-[#66ccff] border-[#99ddff] text-black";
-        }
-        if (e.includes('tropical storm') || e.includes('hurricane')) {
+
+        if (e.includes('tropical storm') || e.includes('hurricane'))
             return "bg-[#ff6699] border-[#ff99bb] text-black";
-        }
 
-        if (e.includes('gale warning') || e.includes('brisk wind') || e.includes('lake wind')) {
+        if (e.includes('gale warning') || e.includes('brisk wind') || e.includes('lake wind'))
             return "bg-[#999966] border-[#cccc66] text-black";
-        }
 
-        if (e.includes('statement')) {
+        if (e.includes('statement'))
             return "bg-[#3399ff] border-[#66ccff] text-white";
-        }
 
         if (e.includes("watch"))
             return "bg-[#ffcc00] border-[#ffff00] text-black";
@@ -146,12 +144,12 @@ export default function HomePage() {
 
     return (
         <section className="h-screen grow p-8 overflow-y-scroll scrollbar-width-0">
-            <section className="tracking-widest text-xl border-2 rounded-2xl bg-gray-800 border-gray-200 p-2 min-h-0 mb-2">
+            <section className={`tracking-widest text-xl border-2 ${settings.theme.pageHeader} rounded-2xl p-2 min-h-0 mb-2`}>
                 <h3 className="text-white text-center">At-A-Glance Conditions</h3>
             </section>
 
-            <section className="text-gray-400 grid grid-cols-3 grid-rows-3 w-full h-100 gap-2 border-2 rounded-2xl bg-gray-800 border-gray-200 p-2 min-h-0">
-                <section className="col-span-1 bg-gray-700 rounded-lg border-2 border-gray-200 p-2 flex flex-col">
+            <section className={`grid grid-cols-3 grid-rows-3 w-full h-100 gap-2 border-2 rounded-2xl ${settings.theme.section} p-2 min-h-0`}>
+                <section className={`col-span-1 ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
                     <h3 className="text-white text-center text-xl font-extrabold tracking-wider">
                         Weather Risk Score
                     </h3>
@@ -163,7 +161,7 @@ export default function HomePage() {
                     </p>
                 </section>
 
-                <section className="col-span-1 row-start-2 row-span-2 bg-gray-700 rounded-lg border-2 border-gray-200 p-2 flex flex-col">
+                <section className={`col-span-1 row-start-2 row-span-2 ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
                     <h3 className="text-white text-center text-xl font-extrabold tracking-wider">
                         Newest Alerts
                     </h3>
@@ -205,8 +203,8 @@ export default function HomePage() {
                 </section>
 
                 {/*Most Severe */}
-                <section className="col-span-2 row-span-3 bg-gray-700 rounded-lg border-2 border-gray-200 p-2 flex flex-col">
-                    <h3 className="text-white text-center text-xl font-extrabold">
+                <section className={`col-span-2 row-span-3 ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
+                    <h3 className={`text-white text-center text-xl font-extrabold`}>
                         Most Severe Weather Alerts
                     </h3>
                     <section className="flex-1 overflow-y-auto grid auto-rows-max grid-cols-3 gap-2 scrollbar-width-0">
@@ -273,6 +271,134 @@ export default function HomePage() {
                     </section>
                 </section>
 
+            </section>
+            <section className={`tracking-widest text-xl mt-4 border-2 ${settings.theme.pageHeader} rounded-2xl p-2 min-h-0 mb-2`}>
+                <h3 className="text-white text-center">Information Center</h3>
+            </section>
+            <section className={`grid auto-rows-max grid-cols-6 w-full mt-2 h-content gap-2 border-2 rounded-2xl ${settings.theme.section} p-2 min-h-0`}>
+                <section className={`${settings.theme.card} rounded-lg border-2 p-2 flex flex-col col-span-3`}>
+                    <h3 className="text-white text-center text-xl font-extrabold tracking-wider">
+                        The Mission
+                    </h3>
+                    <p className={'font-bold text-xl text-center'}>
+                        Flatwoods Weather is dedicated to providing real-time, local weather risk assessments to help you stay informed and prepared. Our mission is to empower individuals and communities with actionable insights, enabling them to make informed decisions and stay safe during severe weather events.
+                    </p>
+                </section>
+                <section className={`${settings.theme.card} rounded-lg border-2 p-2 flex flex-col col-span-3`}>
+                    <h3 className="text-white text-center text-xl font-extrabold tracking-wider">
+                        How Does It Work?
+                    </h3>
+                    <p className={'font-bold text-xl text-center'}>
+                        Flatwoods Weather utilizes advanced machine learning algorithms and real-time data from the National Weather Service to provide accurate and up-to-date weather risk assessments. By analyzing various weather parameters and historical data, we generate a comprehensive risk score that helps you understand the potential impact of severe weather in the general Tri-State area.
+                    </p>
+                </section>
+                <section className={`${settings.theme.card} rounded-lg border-2 p-2 flex flex-col col-span-2`}>
+                    <h3 className="text-white text-center text-xl font-extrabold tracking-wider">
+                        At-A-Glance Conditions Explanation
+                    </h3>
+                    <p className={'font-bold text-xl text-center'}>
+                        The At-A-Glance Conditions section provides a quick overview of the weather situation for the Tri-State area. It includes the weather risk score, which is a quantitative representation of how dangerous the current weather situation is. The risk score is categorized into different levels (Normal, Minor, Moderate, Severe, Extreme) to help you easily understand the severity of the weather. Additionally, it highlights the newest alerts and the most severe weather events currently impacting the area, allowing you to stay informed about potential threats and take necessary precautions.
+                    </p>
+                </section>
+                <section className={`${settings.theme.card} rounded-lg border-2 p-2 flex flex-col col-span-4`}>
+                    <h3 className="text-white text-center text-xl font-extrabold tracking-wider">
+                        Weather Risk Score
+                    </h3>
+                    <p className={'font-bold text-xl text-center'}>
+                        The Weather Risk Score is a quantitative measure of how severe the current weather conditions are. It is split into 5 categories.
+                    </p>
+                    <hr className="mb-4 mt-4" />
+                    <ul>
+                        <li className="text-green-700 font-extrabold text-lg">0-29: Normal</li>
+                        <p>Weather is low in severity, usually consisting of background events.</p>
+                        <li className="text-yellow-500 font-extrabold text-lg">30-59: Minor</li>
+                        <p>Weather is somewhat concerning, with potential for minor impacts.</p>
+                        <li className="text-orange-500 font-extrabold text-lg">60-89: Moderate</li>
+                        <p>Weather is significant, with moderate potential for damaging impacts.</p>
+                        <li className="text-red-500 font-extrabold text-lg">90-119: Severe</li>
+                        <p>Weather is very serious, with severe potential for significant impacts.</p>
+                        <li className="text-purple-700 font-extrabold text-lg">120+: Extreme</li>
+                        <p>Weather is extremely dangerous, with potential for catastrophic impacts.</p>
+                    </ul>
+                    <hr className="mb-4 mt-4" />
+                    <p className="text-xl font-bold">We use Machine Learning to analyze the current weather and predict its severity. Remember that it is a rough estimate of the whole Tri-State area, so pay attention to events specific to your county.</p>
+                </section>
+                <section className={`${settings.theme.card} rounded-lg border-2 p-2 flex flex-col col-span-6`}>
+                    <h3 className="text-white text-center text-xl font-extrabold tracking-wider">
+                        Weather Events
+                    </h3>
+                    <section className="flex flex-col overflow-y-scroll scrollbar-width-0 gap-2 p-2">
+                        <section className={`text-xl p-2 rounded-sm font-bold ${settings.theme.section} text-gray-400 hover:brightness-125 hover:cursor-pointer`} onClick={() => setShowInfoId('tornado-warning')}>
+                            <p className={`text-xl p-2 rounded-sm font-bold text-red-400`} >Tornado Warning</p>
+                            {showInfoId === 'tornado-warning' && (
+                                <section>
+                                    <p className="text-md p-2 text-gray-300">
+                                        A tornado warning is issued when a tornado has been sighted or indicated by weather radar. It means that there is an imminent threat to life and property, and people in the affected area should take immediate action to seek shelter and protect themselves from the dangerous weather conditions.
+                                    </p>
+                                    <p className="p-2 text-gray-300">Tornado Warnings have a damage tag associated to them. They indicate the potential for significant damage to structures and life. These are the damage tags:</p>
+                                    <ul className="list-disc list-inside text-gray-400">
+                                        <li className="mb-2"><span className="font-bold text-yellow-300">BASE: </span>A normal tornado warning, if a tornado is on the ground it is not causing a lot of destruction. THIS DOES NOT MEAN IT IS SAFE! ALWAYS SHELTER IF A TORNADO WARNING IS ISSUED!</li>
+                                        <li className="mb-2"><span className="font-bold text-orange-300">CONSIDERABLE: </span>A tornado is on the ground and poses a significant threat to life and property.</li>
+                                        <li className="mb-2"><span className="font-bold text-red-300">CATASTROPHIC: </span>A violent tornado is on the ground and is expected to cause catastrophic damage and loss of life. These warnings are usually upgraded to a Tornado Emergency.</li>
+                                    </ul>
+                                    <p className="p-2 text-gray-300">Tornado Warnings also have a SOURCE tag that indicates how the tornado was detected.</p>
+                                    <ul className="list-disc list-inside text-gray-400">
+                                        <li className="mb-2"><span className="font-bold text-yellow-300">RADAR INDICATED: </span>A tornado was identified by weather professionals using doppler radar. This does not mean a tornado is on the ground, but should be treated just the same. ALWAYS TAKE SHELTER IN A TORNADO WARNING!</li>
+                                        <li className="mb-2"><span className="font-bold text-red-300">CONFIRMED: </span>A tornado has been confirmed by weather spotters, emergency personnel, or other reliable sources. This means a tornado is actively on the ground.</li>
+                                    </ul>
+                                </section>
+                            )}
+                        </section>
+                        <section className={`text-xl p-2 rounded-sm font-bold ${settings.theme.section} text-gray-400 hover:brightness-125 hover:cursor-pointer`} onClick={() => setShowInfoId('tornado-watch')}>
+                            <p className={`text-xl p-2 rounded-sm font-bold text-yellow-400`} >Tornado Watch</p>
+                            {showInfoId === 'tornado-watch' && (
+                                <p className="text-md p-2 text-gray-300">
+                                    A tornado watch is issued when conditions are favorable for the development of tornadoes. It means that there is a potential threat to life and property, and people in the affected area should be prepared to take immediate action if a warning is issued.
+                                </p>
+                            )}
+                        </section>
+                        <section className={`text-xl p-2 rounded-sm font-bold ${settings.theme.section} text-gray-400 hover:brightness-125 hover:cursor-pointer`} onClick={() => setShowInfoId('severe-thunderstorm')}>
+                            <p className={`text-xl p-2 rounded-sm font-bold text-orange-400`} >Severe Thunderstorm Warning</p>
+                            {showInfoId === 'severe-thunderstorm' && (
+                                <section>
+                                    <p className="text-md p-2 text-gray-300">
+                                        A severe thunderstorm warning is issued when a severe thunderstorm is expected or occurring. It means that there is an imminent threat to life and property, and people in the affected area should take immediate action to seek shelter and protect themselves from the dangerous weather conditions.
+                                    </p>
+                                    <p className="p-2 text-gray-300">Severe Thunderstorm Warnings have a damage tag associated to them. They indicate the potential for significant damage to structures and life. These are the damage tags:</p>
+                                    <ul className="list-disc list-inside text-gray-400">
+                                        <li className="mb-2"><span className="font-bold text-yellow-300">BASE: </span>A normal severe thunderstorm warning, if the storm is producing damaging winds of 58MPH and higher or large hail of 1.00 inch and higher.</li>
+                                        <li className="mb-2"><span className="font-bold text-orange-300">CONSIDERABLE: </span>A severe thunderstorm is producing large hail of 1.75 inches and higher or damaging winds of 70MPH and higher.</li>
+                                        <li className="mb-2"><span className="font-bold text-red-300">DESTRUCTIVE: </span>A severe thunderstorm is producing extremely large hail of 2.50 inches and higher or devastating winds of 80MPH and higher.</li>
+                                    </ul>
+                                </section>
+                            )}
+                        </section>
+                        <section className={`text-xl p-2 rounded-sm font-bold ${settings.theme.section} text-gray-400 hover:brightness-125 hover:cursor-pointer`} onClick={() => setShowInfoId('severe-thunderstorm-watch')}>
+                            <p className={`text-xl p-2 rounded-sm font-bold text-yellow-400`} >Severe Thunderstorm Watch</p>
+                            {showInfoId === 'severe-thunderstorm-watch' && (
+                                <p className="text-md p-2 text-gray-300">
+                                    A severe thunderstorm watch is issued when conditions are favorable for the development of severe thunderstorms. It means that there is a potential threat to life and property, and people in the affected area should be prepared to take immediate action if a warning is issued.
+                                </p>
+                            )}
+                        </section>
+                        <section className={`text-xl p-2 rounded-sm font-bold ${settings.theme.section} text-gray-400 hover:brightness-125 hover:cursor-pointer`} onClick={() => setShowInfoId('flash-flood-warning')}>
+                            <p className={`text-xl p-2 rounded-sm font-bold text-blue-400`} >Flash Flood Warning</p>
+                            {showInfoId === 'flash-flood-warning' && (
+                                <p className="text-md p-2 text-gray-300">
+                                    A flash flood warning is issued when a flash flood is expected or occurring. It means that there is an imminent threat to life and property, and people in the affected area should take immediate action to seek higher ground and protect themselves from the dangerous weather conditions.
+                                </p>
+                            )}
+                        </section>
+                        <section className={`text-xl p-2 rounded-sm font-bold ${settings.theme.section} text-gray-400 hover:brightness-125 hover:cursor-pointer`} onClick={() => setShowInfoId('flash-flood-watch')}>
+                            <p className={`text-xl p-2 rounded-sm font-bold text-yellow-400`} >Flash Flood Watch</p>
+                            {showInfoId === 'flash-flood-watch' && (
+                                <p className="text-md p-2 text-gray-300">
+                                    A flash flood watch is issued when conditions are favorable for the development of flash floods. It means that there is a potential threat to life and property, and people in the affected area should be prepared to take immediate action if a warning is issued.
+                                </p>
+                            )}
+                        </section>
+                    </section>
+                </section>
             </section>
         </section>
     )

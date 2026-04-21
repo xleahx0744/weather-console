@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import useInterval from "../hooks/useInterval";
+import { useSettings } from "../hooks/useSettings.js";
 
 const riskToCategory = (risk) => {
     if (risk < 30) return 'Normal';
@@ -34,25 +35,29 @@ export default function RiskScore() {
 
     useInterval(fetchInfo, 15000)
 
+    const defaultSettings = useSettings().settings;
+
+    const settings = localStorage.getItem('userSettings') ? JSON.parse(localStorage.getItem('userSettings')) : defaultSettings;
+
 
     return (
         <section className="h-screen grow p-8 overflow-y-scroll scrollbar-width-0">
-            <section className="tracking-widest text-xl border-2 rounded-2xl bg-gray-800 border-gray-200 p-2 min-h-0 mb-2">
+            <section className={`tracking-widest text-xl border-2 rounded-2xl ${settings.theme.pageHeader} p-2 min-h-0 mb-2`}>
                 <h3 className="text-white text-center">In-Depth Risk Score Analysis</h3>
             </section>
-            <section className="text-gray-400 grid grid-cols-3 grid-rows-1 w-full h-80 gap-4 border-2 rounded-2xl bg-gray-700 border-gray-200 p-2 min-h-0">
-                <section className="col-span-1 bg-gray-700 rounded-lg border-2 border-gray-200 p-2 flex flex-col min-h-0 h-full">
+            <section className={`text-gray-400 grid grid-cols-3 grid-rows-1 w-full h-80 gap-4 border-2 rounded-2xl ${settings.theme.section} border-gray-200 p-2 min-h-0`}>
+                <section className={`col-span-1 ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col min-h-0 h-full`}>
                     <h3 className="text-white text-center text-xl font-extrabold tracking-wider">Weather Risk Score</h3>
                     <p className={riskToCategory(data?.risk ?? 0).toLowerCase() + ' font-bold text-2xl text-center'}>{riskToCategory(data?.risk ?? 0)}</p>
                     <p className="text-white text-center text-xl font-extrabold tracking-wider">{(data?.risk ?? 0).toFixed(2)}</p>
                     <p className="text-center mt-2 text-xl text-white">Extra Risk Data</p>
                     <p className="text-center mt-2 text-xl text-gray-400">Highest Damage Risk: {data?.maxRisk?.toFixed(2) * 100 || 0}% </p>
                     <p className="text-center mt-1 text-xl text-gray-400">Average Damage Risk: {data?.avgRisk?.toFixed(2) * 100 || 0}%</p>
-                    <p className="text-center mt-1 text-xl text-gray-400">30-Minute Average Risk: {data?.thirtyMinuteRisk ? (data.thirtyMinuteRisk.reduce((sum, item) => sum + item.data, 0) / data.thirtyMinuteRisk.length).toFixed(2) : 'N/A'} / 10</p>
+                    <p className="text-center mt-1 text-xl text-gray-400">30-Minute Average Risk: {data?.thirtyMinuteRisk ? (data.thirtyMinuteRisk.reduce((sum, item) => sum + item.data, 0) / data.thirtyMinuteRisk.length).toFixed(2) : 'N/A'}</p>
                 </section>
-                <section className="col-span-2 bg-gray-700 rounded-lg border-2 border-gray-200 p-2 flex flex-col min-h-0 h-full">
+                <section className={`col-span-2 ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col min-h-0 h-full`}>
                     <h3 className="text-white text-center text-xl tracking-wider font-extrabold mb-2">30-Minute Risk History</h3>
-                    <section className="flex-1 overflow-y-auto scrollbar-width-0 grid auto-rows-max grid-cols-4 gap-2 min-h-0">
+                    <section className="flex-1 overflow-y-auto scrollbar-width-0 grid auto-rows-max grid-cols-4 gap-2 min-h-0 max-h-full">
                         {data?.thirtyMinuteRisk
                             ?.slice()
                             ?.reverse()

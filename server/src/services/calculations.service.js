@@ -86,7 +86,7 @@ const calculateRisk = (data) => {
         let adjRisk = output < 0.2 ? 0 : output;
         adjRisk = isNaN(adjRisk) ? 0 : Math.max(0, adjRisk);
 
-        let rawScore = adjRisk * eventWeight * 100;
+        let rawScore = adjRisk * eventWeight * 80;
 
         // The Watch & Advisory Cap (prevents minor alerts from generating high base scores)
         const eventName = alert.properties.event?.toLowerCase() || "";
