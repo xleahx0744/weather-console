@@ -10,7 +10,6 @@ const compareAndStore = async () => {
 
     if (Math.abs(oldRisk - newRisk) > THRESHOLD) {
         try {
-            console.log('query');
 
             await db.query(
                 'INSERT INTO weather_history (id, risk, events, damage, date) VALUES ($1, $2, $3, $4, $5)',

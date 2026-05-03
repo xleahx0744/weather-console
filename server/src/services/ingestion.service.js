@@ -5,7 +5,7 @@ const { compareAndStore } = require('./comparison.service')
 
 const ingestAlerts = async () => {
 
-    const TRACKED_STATES = ['KY', 'OH', 'IN'];
+    const TRACKED_STATES = ['KY', 'OH', 'IN', 'WV'];
     const endpoint = TRACKED_STATES.join(',')
 
     try {
@@ -16,18 +16,12 @@ const ingestAlerts = async () => {
         }
         const data = await res.json();
 
-        if (!data == []) {
-            console.clear()
+        if (data != []) {
             setRisk(calculateRisk(data))
             await compareAndStore();
         } else {
-            console.clear()
             console.log('No alerts')
         }
-
-        
-
-        console.log(getRisk())
     } catch (error) {
         console.error(error)
     }

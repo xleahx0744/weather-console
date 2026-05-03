@@ -2,6 +2,7 @@ const { forward } = require('../models/riskModel.model')
 const trainedModel = require('../jobs/trainedModel.json')
 const { setAlerts, setRiskAdvanced } = require('../utils/riskStore')
 const turf = require('@turf/turf')
+const createScheduledBroadcast = require('./weatherman.service')
 
 const SEVERITY = {
     unknown: 0.2, minor: 0.4, moderate: 0.6, severe: 0.8, extreme: 1.0
@@ -57,7 +58,7 @@ const extractParameters = (params) => {
     if (detection) {
         const det = detection.toUpperCase();
         if (det === 'POSSIBLE') source = 0.2;
-        if (det === 'RADAR INDICATED') source = 0.6;
+        if (det === 'RADAR INDICATED' || det === 'RADAR AND GAUGE INDICATED') source = 0.6;
         if (det === 'OBSERVED') source = 1.0;
     }
 
@@ -149,6 +150,7 @@ const calculateRisk = (data) => {
                 const contributedPoints = alert.rawScore * decayFactor;
                 
                 rawNationalEnergy += contributedPoints;
+
 
                 decayContributions.push({
                     event: alert.event,

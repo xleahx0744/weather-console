@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import useInterval from "../hooks/useInterval";
 import { useSettings } from "../hooks/useSettings.js";
+import { devServer } from "../utils/devserver.js";
 
 const riskToCategory = (risk) => {
     if (risk < 30) return 'Normal';
@@ -24,7 +25,7 @@ export default function HomePage() {
     const settings = localStorage.getItem('userSettings') ? JSON.parse(localStorage.getItem('userSettings')) : defaultSettings;
 
     const fetchInfo = async () => {
-        const response = await fetch('http://localhost:8000/info/risk');
+        const response = await fetch(`${devServer}/info/risk`);
         const data = await response.json();
         setData(data);
         setChanges(data.changes ?? []);
@@ -57,15 +58,16 @@ export default function HomePage() {
 
     const severeEvents = [
         "tornado warning",
-        'tornado watch',
         'severe thunderstorm warning',
-        'tornado emergency'
+        'tornado emergency',
+        'severe thunderstorm watch',
     ]
 
     if (data?.current) {
         data.current.forEach(async e => {
             if (severeEvents.includes(e.event.toLowerCase()) && !uniqueAlerts.has(e.id)) {
                 if (e.event.toLowerCase().includes("tornado")) {
+                    uniqueAlerts.add(e.id);
                     if (settings.audio.tornadoAlert) {
                         new Audio("/tornadoAlert.wav").play();
                     }
@@ -73,6 +75,7 @@ export default function HomePage() {
                         window.speechSynthesis.speak(new SpeechSynthesisUtterance(`A new ${e.event} has been issued for ${e.area}. The risk of damage is ${(e.adjustedRisk * 100).toFixed(2)} percent.`));
                     }
                 } else if (e.event.toLowerCase().includes("severe thunderstorm")) {
+                    uniqueAlerts.add(e.id);
                     if (settings.audio.severeThunderstormAlert) {
                         new Audio('/nonTornadoAlert.wav').play();
                     }
@@ -81,7 +84,10 @@ export default function HomePage() {
                     }
 
                 }
+            }
+            if (e.area.toLowerCase().includes('greenup') && !uniqueAlerts.has(e.id)) {
                 uniqueAlerts.add(e.id);
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance(`A new ${e.event} has been issued that affects Greenup County. The risk of damage is ${(e.adjustedRisk * 100).toFixed(2)} percent.`));
             }
         });
     }
@@ -148,7 +154,7 @@ export default function HomePage() {
                 <h3 className="text-white text-center">At-A-Glance Conditions</h3>
             </section>
 
-            <section className={`grid grid-cols-3 grid-rows-3 w-full h-100 gap-2 border-2 rounded-2xl ${settings.theme.section} p-2 min-h-0`}>
+            <section className={`lg:grid lg:grid-rows-3 lg:grid-cols-3 flex flex-col w-full h-fit lg:h-100 gap-2 border-2 rounded-2xl ${settings.theme.section} p-2 min-h-0`}>
                 <section className={`col-span-1 ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
                     <h3 className="text-white text-center text-xl font-extrabold tracking-wider">
                         Weather Risk Score
@@ -203,11 +209,11 @@ export default function HomePage() {
                 </section>
 
                 {/*Most Severe */}
-                <section className={`col-span-2 row-span-3 ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
+                <section className={`col-span-2 lg:row-span-3 lg:h-full ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
                     <h3 className={`text-white text-center text-xl font-extrabold`}>
                         Most Severe Weather Alerts
                     </h3>
-                    <section className="flex-1 overflow-y-auto grid auto-rows-max grid-cols-3 gap-2 scrollbar-width-0">
+                    <section className="flex-1 overflow-y-auto lg:grid auto-rows-max lg:grid-cols-3 flex-col flex gap-2 scrollbar-width-0">
                         {data.current && sortData(data).map((alert) => {
                             // Destructure the parameters cleanly with a fallback
                             const {
@@ -238,6 +244,11 @@ export default function HomePage() {
                                     <p className="text-xs">
                                         Damage Risk: {(alert.adjustedRisk * 100).toFixed(2)}%
                                     </p>
+                                    {alert['area'].toLowerCase().includes('greenup') && (
+                                        <p className="text-xs font-extrabold blink-3">
+                                            This alert affects Greenup County!
+                                        </p>
+                                    )}
 
                                     {/* Only render this entire block if actual threats exist */}
                                     {hasThreats && (
@@ -275,7 +286,7 @@ export default function HomePage() {
             <section className={`tracking-widest text-xl mt-4 border-2 ${settings.theme.pageHeader} rounded-2xl p-2 min-h-0 mb-2`}>
                 <h3 className="text-white text-center">Information Center</h3>
             </section>
-            <section className={`grid auto-rows-max grid-cols-6 w-full mt-2 h-content gap-2 border-2 rounded-2xl ${settings.theme.section} p-2 min-h-0`}>
+            <section className={`lg:grid lg:auto-rows-max lg:grid-cols-6 w-full flex flex-col mt-2 h-content gap-2 border-2 rounded-2xl ${settings.theme.section} p-2 min-h-0`}>
                 <section className={`${settings.theme.card} rounded-lg border-2 p-2 flex flex-col col-span-3`}>
                     <h3 className="text-white text-center text-xl font-extrabold tracking-wider">
                         The Mission
@@ -352,9 +363,12 @@ export default function HomePage() {
                         <section className={`text-xl p-2 rounded-sm font-bold ${settings.theme.section} text-gray-400 hover:brightness-125 hover:cursor-pointer`} onClick={() => setShowInfoId('tornado-watch')}>
                             <p className={`text-xl p-2 rounded-sm font-bold text-yellow-400`} >Tornado Watch</p>
                             {showInfoId === 'tornado-watch' && (
-                                <p className="text-md p-2 text-gray-300">
-                                    A tornado watch is issued when conditions are favorable for the development of tornadoes. It means that there is a potential threat to life and property, and people in the affected area should be prepared to take immediate action if a warning is issued.
-                                </p>
+                                <section>
+                                    <p className="text-md p-2 text-gray-300">
+                                        A tornado watch is issued when conditions are favorable for the development of tornadoes. It means that there is a potential threat to life and property, and people in the affected area should be prepared to take immediate action if a warning is issued.
+                                    </p>
+                                    <p className="p-2">A good way to think of a watch is as such. Inside of a restaurant, there are the various incredients to create a burger, but a burger has not been made. That is a Burger Watch. Once a burger is made, it becomes a Burger Warning.</p>
+                                </section>
                             )}
                         </section>
                         <section className={`text-xl p-2 rounded-sm font-bold ${settings.theme.section} text-gray-400 hover:brightness-125 hover:cursor-pointer`} onClick={() => setShowInfoId('severe-thunderstorm')}>
@@ -376,9 +390,12 @@ export default function HomePage() {
                         <section className={`text-xl p-2 rounded-sm font-bold ${settings.theme.section} text-gray-400 hover:brightness-125 hover:cursor-pointer`} onClick={() => setShowInfoId('severe-thunderstorm-watch')}>
                             <p className={`text-xl p-2 rounded-sm font-bold text-yellow-400`} >Severe Thunderstorm Watch</p>
                             {showInfoId === 'severe-thunderstorm-watch' && (
-                                <p className="text-md p-2 text-gray-300">
-                                    A severe thunderstorm watch is issued when conditions are favorable for the development of severe thunderstorms. It means that there is a potential threat to life and property, and people in the affected area should be prepared to take immediate action if a warning is issued.
-                                </p>
+                                <section>
+                                    <p className="text-md p-2 text-gray-300">
+                                        A severe thunderstorm watch is issued when conditions are favorable for the development of severe thunderstorms. It means that there is a potential threat to life and property, and people in the affected area should be prepared to take immediate action if a warning is issued.
+                                    </p>
+                                    <p className="p-2">A good way to think of a watch is as such. Inside of a restaurant, there are the various incredients to create a burger, but a burger has not been made. That is a Burger Watch. Once a burger is made, it becomes a Burger Warning.</p>
+                                </section>
                             )}
                         </section>
                         <section className={`text-xl p-2 rounded-sm font-bold ${settings.theme.section} text-gray-400 hover:brightness-125 hover:cursor-pointer`} onClick={() => setShowInfoId('flash-flood-warning')}>

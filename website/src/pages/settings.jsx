@@ -39,15 +39,15 @@ const SettingsPage = () => {
         <h3 className="text-white text-center">Application Control Center</h3>
       </section>
 
-      <section className={`text-gray-400 grid grid-cols-3 w-full h-100 gap-2 border-2 rounded-2xl ${settings.theme.section} p-2 min-h-0`}>
+      <section className={`text-gray-400 grid lg:grid-cols-3 grid-cols-1 w-full gap-2 border-2 rounded-2xl ${settings.theme.section} p-2 min-h-0`}>
         
         {/* General Settings */}
         <section className={`col-span-1 row-span-1 ${settings.theme.card} rounded-lg border-2 border-gray-200 p-2 flex flex-col gap-4`}>
           <h3 className="text-white text-center text-xl font-extrabold tracking-wider border-b border-gray-500 pb-2 mb-2">
             General Settings
           </h3>
-          <section className="flex justify-between items-center gap-2 flex-col">
-            <h3>Themes</h3>
+          <h3>Themes</h3>
+          <section className="flex justify-between items-center gap-2">
             <section className='flex'>
               <label className="text-white">Default</label>
               <input
