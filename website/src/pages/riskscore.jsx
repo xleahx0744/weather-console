@@ -2,20 +2,21 @@ import { useState, useEffect } from "react"
 import useInterval from "../hooks/useInterval";
 import { useSettings } from "../hooks/useSettings.js";
 import { devServer } from "../utils/devserver.js";
+import Footer from "../components/footer.jsx";
 
 const riskToCategory = (risk) => {
-    if (risk < 30) return 'Normal';
-    if (risk < 60) return 'Minor';
-    if (risk < 90) return 'Moderate';
-    if (risk < 120) return 'Severe';
+    if (risk < 20) return 'Normal';
+    if (risk < 40) return 'Minor';
+    if (risk < 60) return 'Moderate';
+    if (risk < 80) return 'Severe';
     return 'Extreme';
 }
 
 const riskBGLookup = (risk) => {
-    if (risk < 30) return 'bg-green-600 text-white border-green-400';
-    if (risk < 60) return 'bg-yellow-500 text-black border-yellow-400';
-    if (risk < 90) return 'bg-orange-500 text-black border-orange-400';
-    if (risk < 120) return 'bg-red-500 text-white border-red-400';
+    if (risk < 20) return 'bg-green-600 text-white border-green-400';
+    if (risk < 40) return 'bg-yellow-500 text-black border-yellow-400';
+    if (risk < 60) return 'bg-orange-500 text-black border-orange-400';
+    if (risk < 80) return 'bg-red-500 text-white border-red-400';
     return 'bg-purple-700 text-white border-purple-400';
 }
 
@@ -73,6 +74,7 @@ export default function RiskScore() {
                     </section>
                 </section>
             </section>
+            <Footer />
         </section>
     )
 }

@@ -1,3 +1,4 @@
+
 Backend Documentation
 
 **GET /risk**
@@ -12,6 +13,7 @@ Backend Documentation
             id: str,
             event: str,
             area: str,
+            description: str,
             predictedRisk: int,
             adjustedRisk: int,
             eventWeight: int,
@@ -67,7 +69,7 @@ Error Code: 500: The Server is Unreachable
             adjustedRisk: int,
             eventWeight: int,
             rawScore: int,
-            parameters: Object,
+            parameters: Object, (Follows the parameters object of the NWS API)
         }
     ]
 }

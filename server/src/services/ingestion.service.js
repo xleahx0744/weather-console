@@ -9,7 +9,7 @@ const ingestAlerts = async () => {
     const endpoint = TRACKED_STATES.join(',')
 
     try {
-        const res = await fetch(`https://api.weather.gov/alerts/active?area=${endpoint}`); // ?area=${endpoint}
+        const res = await fetch(`https://api.weather.gov/alerts/active`); // ?area=${endpoint}
         if (!res.ok) {
             console.error('Failed to fetch alerts:', res.statusText);
             return;

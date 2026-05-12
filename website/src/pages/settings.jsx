@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useSettings } from "../hooks/useSettings.js"; 
 import useInterval from '../hooks/useInterval.js';
+import Footer from '../components/footer.jsx';
 
 const SettingsPage = () => {
   // Destructure the settings state and your update function from context
@@ -58,11 +59,11 @@ const SettingsPage = () => {
                   ...prev,
                     theme: {
                       body: "bg-gray-950",
-                      card: "bg-gray-700/80 border-gray-200",
-                      pageHeader: "bg-gray-800/40 border-gray-200",
-                      section: "bg-gray-800/40 border-gray-200 text-gray-400",
-                      sidebar: "bg-gray-800/80 border-gray-900 border-b-4",
-                      sidebarPage: "bg-gray-800/80 text-white hover:bg-gray-700",
+                      card: "bg-gray-700/80 border-gray-200 backdrop-blur-sm",
+                      pageHeader: "bg-gray-800/40 border-gray-200 backdrop-blur-sm",
+                      section: "bg-gray-800/40 border-gray-200 text-gray-400 backdrop-blur-sm",
+                      sidebar: "bg-gray-800/80 border-gray-900 border-b-4 backdrop-blur-sm",
+                      sidebarPage: "bg-gray-800/80 text-white border-2 border-gray-400 hover:bg-gray-700",
                       name: 'default',
                     },
                   }
@@ -80,11 +81,11 @@ const SettingsPage = () => {
                   ...prev,
                     theme: {
                       body: "bg-mauve-950",
-                      card: "bg-mauve-700/80 border-mauve-200",
-                      pageHeader: "bg-mauve-800/40 border-mauve-200",
-                      section: "bg-mauve-800/40 border-mauve-200 text-mauve-400",
-                      sidebar: "bg-mauve-800/80 border-mauve-900 border-b-4",
-                      sidebarPage: "bg-mauve-800/80 text-white hover:bg-mauve-700",
+                      card: "bg-mauve-700/80 border-mauve-200 backdrop-blur-sm",
+                      pageHeader: "bg-mauve-800/40 border-mauve-200 backdrop-blur-sm",
+                      section: "bg-mauve-800/40 border-mauve-200 text-mauve-400 backdrop-blur-sm",
+                      sidebar: "bg-mauve-800/80 border-mauve-900 border-b-4 backdrop-blur-sm",
+                      sidebarPage: "bg-mauve-800/80 text-white border-2 border-mauve-400 hover:bg-mauve-700",
                       name: 'mauve',
                     },
                   }
@@ -102,11 +103,11 @@ const SettingsPage = () => {
                     ...prev,
                       theme: {
                         body: "bg-zinc-950",
-                        card: "bg-zinc-700/80 border-zinc-200",
-                        pageHeader: "bg-zinc-800/40 border-zinc-200",
-                        section: "bg-zinc-800/40 border-zinc-200 text-zinc-400",
-                        sidebar: "bg-zinc-800/80 border-zinc-900 border-b-4",
-                        sidebarPage: "bg-zinc-800/80 text-white hover:bg-zinc-700",
+                        card: "bg-zinc-700/80 border-zinc-200 backdrop-blur-sm",
+                        pageHeader: "bg-zinc-800/40 border-zinc-200 backdrop-blur-sm",
+                        section: "bg-zinc-800/40 border-zinc-200 text-zinc-400 backdrop-blur-sm",
+                        sidebar: "bg-zinc-800/80 border-zinc-900 border-b-4 backdrop-blur-sm",
+                        sidebarPage: "bg-zinc-800/80 text-white border-zinc-400 border-2 hover:bg-zinc-700",
                         name: 'zinc',
                       },
                     }
@@ -124,11 +125,11 @@ const SettingsPage = () => {
                     ...prev,
                       theme: {
                         body: "bg-olive-950",
-                        card: "bg-olive-700/80 border-olive-200",
-                        pageHeader: "bg-olive-800/40 border-olive-200",
-                        section: "bg-olive-800/40 border-olive-200 text-olive-400",
-                        sidebar: "bg-olive-800/80 border-olive-900 border-b-4",
-                        sidebarPage: "bg-olive-800/80 text-white hover:bg-olive-700",
+                        card: "bg-olive-700/80 border-olive-200 backdrop-blur-sm",
+                        pageHeader: "bg-olive-800/40 border-olive-200 backdrop-blur-sm",
+                        section: "bg-olive-800/40 border-olive-200 text-olive-400 backdrop-blur-sm",
+                        sidebar: "bg-olive-800/80 border-olive-900 border-b-4 backdrop-blur-sm",
+                        sidebarPage: "bg-olive-800/80 text-white border-olive-400 border-2 hover:bg-olive-700",
                         name: 'olive',
                       },
                     }
@@ -194,6 +195,7 @@ const SettingsPage = () => {
         </section>
 
       </section>
+      <Footer />
     </div>
   );
 };

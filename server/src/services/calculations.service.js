@@ -72,13 +72,15 @@ const calculateRisk = (data) => {
     // --- Step 1: Predict & Calculate Raw Scores ---
     const predictions = areaAlerts.map(alert => {
         const eventParameters = alert.properties.parameters || {};
+        const { gust, hail, threat, source } = extractParameters(eventParameters);
 
         const severity = SEVERITY[alert.properties.severity?.toLowerCase()] || 0.5;
         const certainty = CERTAINTY[alert.properties.certainty?.toLowerCase()] || 0.5;
-        const eventWeight = EVENT[alert.properties.event?.toLowerCase()] || 0.5;
+        let eventWeight = EVENT[alert.properties.event?.toLowerCase()] || 0.5;
+        if (eventParameters.tornadoDamageThreat === 'CATASTROPHIC') {
+            eventWeight = EVENT['tornado emergency'] || 0.5;
+        }
         const watchWarning = containsWatch(alert);
-
-        const { gust, hail, threat, source } = extractParameters(eventParameters);
 
         const { output } = forward([
             severity, certainty, eventWeight, watchWarning, gust, hail, threat, source
@@ -90,17 +92,26 @@ const calculateRisk = (data) => {
         let rawScore = adjRisk * eventWeight * 80;
 
         // The Watch & Advisory Cap (prevents minor alerts from generating high base scores)
-        const eventName = alert.properties.event?.toLowerCase() || "";
-        if (eventName.includes('advisory') || eventName.includes('statement')) {
+        let eventName = alert.properties.event?.toLowerCase() || "";
+        if (eventName.includes('advisory')) {
             rawScore = Math.min(rawScore, 20);
         } else if (eventName.includes('watch')) {
             rawScore = Math.min(rawScore, 35);
         }
 
+        if (eventName.includes('tornado') && eventParameters.tornadoDamageThreat?.toLowerCase() === 'catastrophic') {
+            eventName = 'Tornado Emergency';
+        } else {
+            eventName = alert.properties.event || "Unknown Event";
+        }
+
         return {
             id: alert.id,
-            event: alert.properties.event,
+            event: eventName,
             area: alert.properties.areaDesc,
+            description: alert.properties.description,
+            issued: alert.properties.sent,
+            expires: alert.properties.expires,
             predictedRisk: output,
             adjustedRisk: adjRisk,
             eventWeight: eventWeight,

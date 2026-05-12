@@ -43,6 +43,23 @@
     animation: blink 3s infinite;
 }
 
+.weather-container {
+    position: relative;
+    padding-left: 13px;
+}
+
+.weather-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 100%;
+    border-radius: 8px 0px 0px 8px;
+    background-color: var(--weather-color, grey);
+    z-index: -1;
+}
+
 @keyframes blink {
     0% { opacity: 1}
     50% { opacity: 0.5}

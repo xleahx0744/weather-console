@@ -30,11 +30,9 @@ function trainNN(dataset, model, learningRate = 0.01, maxEpochs = 5000, threshol
     while (avgError > threshold && epoch < maxEpochs) {
         let totalError = 0;
 
-        // Shuffle dataset each epoch to improve learning
         dataset.sort(() => Math.random() - 0.5);
 
         for (const data of dataset) {
-            // UPDATED: Now pulling all 7 features from the dataset
             const input = [
                 data.encoded.severity, 
                 data.encoded.certainty, 

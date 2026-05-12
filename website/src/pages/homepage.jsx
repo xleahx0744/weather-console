@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import useInterval from "../hooks/useInterval";
 import { useSettings } from "../hooks/useSettings.js";
 import { devServer } from "../utils/devserver.js";
+import Footer from "../components/footer.jsx";
 
 const riskToCategory = (risk) => {
-    if (risk < 30) return 'Normal';
-    if (risk < 60) return 'Minor';
-    if (risk < 90) return 'Moderate';
-    if (risk < 120) return 'Severe';
+    if (risk < 20) return 'Normal';
+    if (risk < 40) return 'Minor';
+    if (risk < 60) return 'Moderate';
+    if (risk < 80) return 'Severe';
     return 'Extreme';
 }
 
@@ -19,6 +20,7 @@ export default function HomePage() {
     const [changes, setChanges] = useState([]);
     const [oldRisk, setOldRisk] = useState(0);
     const [showInfoId, setShowInfoId] = useState(null);
+    const [alertInfo, setAlertInfo] = useState(null);
 
     const defaultSettings = useSettings().settings;
 
@@ -60,90 +62,79 @@ export default function HomePage() {
         "tornado warning",
         'severe thunderstorm warning',
         'tornado emergency',
-        'severe thunderstorm watch',
     ]
 
-    if (data?.current) {
-        data.current.forEach(async e => {
+    if (data?.changes) {
+        data.changes.forEach(async e => {
+            let type;
+            if (e._type === 'new') type = 'A new';
+            if (e._type === 'updated') type = 'An updated';
             if (severeEvents.includes(e.event.toLowerCase()) && !uniqueAlerts.has(e.id)) {
-                if (e.event.toLowerCase().includes("tornado")) {
+                if (e.event.toLowerCase().includes("tornado") && e._type !== 'removed') {
                     uniqueAlerts.add(e.id);
                     if (settings.audio.tornadoAlert) {
                         new Audio("/tornadoAlert.wav").play();
                     }
+                    setTimeout(3000)
                     if (settings.speech.tornadoAlert) {
-                        window.speechSynthesis.speak(new SpeechSynthesisUtterance(`A new ${e.event} has been issued for ${e.area}. The risk of damage is ${(e.adjustedRisk * 100).toFixed(2)} percent.`));
+                        window.speechSynthesis.speak(new SpeechSynthesisUtterance(`${type} ${e.parameters?.tornadoDetection} ${e.parameters?.tornadoDamageThreat || " "} ${e.event} has been issued for ${e.area}. The risk of damage is ${(e.adjustedRisk * 100).toFixed(2)} percent.`));
                     }
-                } else if (e.event.toLowerCase().includes("severe thunderstorm")) {
+                } else if (e.event.toLowerCase().includes("severe thunderstorm") && e._type !== 'removed') {
                     uniqueAlerts.add(e.id);
                     if (settings.audio.severeThunderstormAlert) {
                         new Audio('/nonTornadoAlert.wav').play();
                     }
+                    setTimeout(1000)
                     if (settings.speech.severeThunderstormAlert) {
-                        window.speechSynthesis.speak(new SpeechSynthesisUtterance(`A new ${e.event} has been issued for ${e.area}. The risk of damage is ${(e.adjustedRisk * 100).toFixed(2)} percent.`));
+                        window.speechSynthesis.speak(new SpeechSynthesisUtterance(`${type} ${e.parameters?.thunderstormDamageThreat || " "} ${e.event} has been issued for ${e.area}. The risk of damage is ${(e.adjustedRisk * 100).toFixed(2)} percent.`));
                     }
 
                 }
             }
-            if (e.area.toLowerCase().includes('greenup') && !uniqueAlerts.has(e.id)) {
+            if (e.area.toLowerCase().includes('greenup') && !uniqueAlerts.has(e.id) && e._type !== 'removed') {
                 uniqueAlerts.add(e.id);
-                window.speechSynthesis.speak(new SpeechSynthesisUtterance(`A new ${e.event} has been issued that affects Greenup County. The risk of damage is ${(e.adjustedRisk * 100).toFixed(2)} percent.`));
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance(`${type} ${e.event} has been issued that affects Greenup County. The risk of damage is ${(e.adjustedRisk * 100).toFixed(2)} percent.`));
             }
         });
     }
 
-    const getNWSStyle = (event) => {
-        const e = event.toLowerCase();
-
-        if (e.includes("tornado warning"))
-            return "bg-[#cc0000] border-[#ff0000] text-white";
-
-        if (e.includes("tornado watch"))
-            return "bg-[#ffcc00] border-[#ffff00] text-black";
-
-        if (e.includes('tornado emergency'))
-            return "bg-[#d234eb] border-[#e246fa] text-black";
-
-        if (e.includes("severe thunderstorm warning"))
-            return "bg-[#ff9900] border-[#ffcc00] text-black";
-
-        if (e.includes("flash flood warning"))
-            return "bg-[#00cc66] border-[#00ff99] text-black";
-        
-        if (e.includes("flood warning"))
-            return "bg-[#00cc66] border-[#00ff99] text-black";
-
-        if (e.includes("freeze warning"))
-            return "bg-[#3244a8] border-[#4454ab] text-white";
-
-        if (e.includes("red flag warning") || e.includes("fire weather warning"))
-            return "bg-[#ff6600] border-[#ff9900] text-black";
-
-        if (e.includes('special weather statement'))
-            return "bg-[#af25cf] border-[#b855cf] text-white";
-
-        if (e.includes('high wind warning') || e.includes('wind advisory'))
-            return "bg-[#999966] border-[#cccc66] text-black";
-
-        if (e.includes('winter weather') || e.includes('ice storm') || e.includes('winter storm'))
-            return "bg-[#66ccff] border-[#99ddff] text-black";
-
-        if (e.includes('tropical storm') || e.includes('hurricane'))
-            return "bg-[#ff6699] border-[#ff99bb] text-black";
-
-        if (e.includes('gale warning') || e.includes('brisk wind') || e.includes('lake wind'))
-            return "bg-[#999966] border-[#cccc66] text-black";
-
-        if (e.includes('statement'))
-            return "bg-[#3399ff] border-[#66ccff] text-white";
-
-        if (e.includes("watch"))
-            return "bg-[#ffcc00] border-[#ffff00] text-black";
-
-        if (e.includes("advisory"))
-            return "bg-[#3399ff] border-[#66ccff] text-white";
-
-        return "bg-gray-700 border-gray-500 text-white";
+    const eventColors = {
+        "tornado emergency": "#c100aa",
+        "tornado warning": "#e83232",
+        "severe thunderstorm warning": "#ff8317",
+        "flash flood warning": "#24388D",
+        'warning': "#e74c3c",
+        "watch": "#f1c40f",
+        "advisory": "#2ecc8a",
+        "statement": "#ae34db",
+    }
+    const getColorForEvent = (event) => {
+        const lowerEvent = event.toLowerCase();
+        if (lowerEvent.includes("tornado emergency")) {
+            return eventColors["tornado emergency"];
+        }
+        if (lowerEvent.includes("tornado warning")) {
+            return eventColors["tornado warning"];
+        }
+        if (lowerEvent.includes("severe thunderstorm warning")) {
+            return eventColors["severe thunderstorm warning"];
+        }
+        if (lowerEvent.includes("flash flood warning")) {
+            return eventColors["flash flood warning"];
+        }
+        if (lowerEvent.includes("warning")) {
+            return eventColors["warning"];
+        }
+        if (lowerEvent.includes("watch")) {
+            return eventColors["watch"];
+        }
+        if (lowerEvent.includes("advisory")) {
+            return eventColors["advisory"];
+        }
+        if (lowerEvent.includes("statement")) {
+            return eventColors["statement"];
+        }
+        return eventColors[lowerEvent];
     };
 
     useInterval(fetchInfo, 15000)
@@ -154,8 +145,8 @@ export default function HomePage() {
                 <h3 className="text-white text-center">At-A-Glance Conditions</h3>
             </section>
 
-            <section className={`lg:grid lg:grid-rows-3 lg:grid-cols-3 flex flex-col w-full h-fit lg:h-100 gap-2 border-2 rounded-2xl ${settings.theme.section} p-2 min-h-0`}>
-                <section className={`col-span-1 ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
+            <section className={`lg:grid lg:grid-rows-3 lg:grid-cols-9 flex flex-col w-full h-fit lg:h-100 gap-2 border-2 rounded-2xl ${settings.theme.section} p-2 min-h-0`}>
+                <section className={`col-span-2 ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
                     <h3 className="text-white text-center text-xl font-extrabold tracking-wider">
                         Weather Risk Score
                     </h3>
@@ -167,7 +158,7 @@ export default function HomePage() {
                     </p>
                 </section>
 
-                <section className={`col-span-1 row-start-2 row-span-2 ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
+                <section className={`col-span-2 row-start-2 row-span-2 ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
                     <h3 className="text-white text-center text-xl font-extrabold tracking-wider">
                         Newest Alerts
                     </h3>
@@ -182,7 +173,8 @@ export default function HomePage() {
                             changes.map((alert) => (
                                 <div
                                     key={alert.id}
-                                    className={`rounded-lg p-2 border-2 transition-all duration-300 ${getNWSStyle(alert.event)}`}
+                                    className={`rounded-lg p-2 border-2 transition-all duration-300 text-gray-300 weather-container`}
+                                    style={{ '--weather-color': getColorForEvent(alert.event) }}
                                 >
                                     <p className="text-sm font-semibold">{alert.event}</p>
                                     <p className="text-xs">Area: {alert.area}</p>
@@ -209,11 +201,11 @@ export default function HomePage() {
                 </section>
 
                 {/*Most Severe */}
-                <section className={`col-span-2 lg:row-span-3 lg:h-full ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
+                <section className={`col-span-4 lg:row-span-3 lg:h-full ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
                     <h3 className={`text-white text-center text-xl font-extrabold`}>
-                        Most Severe Weather Alerts
+                        Active Weather Alerts
                     </h3>
-                    <section className="flex-1 overflow-y-auto lg:grid auto-rows-max lg:grid-cols-3 flex-col flex gap-2 scrollbar-width-0">
+                    <section className="flex-1 overflow-y-auto lg:grid auto-rows-max lg:grid-cols-2 flex-col flex gap-2 scrollbar-width-0">
                         {data.current && sortData(data).map((alert) => {
                             // Destructure the parameters cleanly with a fallback
                             const {
@@ -229,7 +221,7 @@ export default function HomePage() {
 
                             // Check if ANY of these specific threats have truthy values
                             const hasThreats = Boolean(
-                                maxHailThreat || maxWindGust || tornadoDamageThreat || 
+                                maxHailThreat || maxHailSize || maxWindGust || tornadoDamageThreat || 
                                 flashFloodDamageThreat || tornadoDetection || 
                                 flashFloodDetection || thunderstormDamageThreat
                             );
@@ -237,51 +229,88 @@ export default function HomePage() {
                             return (
                                 <div
                                     key={alert.id}
-                                    className={`rounded-lg p-2 border-2 ${getNWSStyle(alert.event)} flex flex-col`}
+                                    className={`rounded-lg p-2 border-2 flex flex-col text-gray-300 weather-container justify-between`}
+                                    style={{ '--weather-color': getColorForEvent(alert.event) }}
                                 >
-                                    <p className="text-sm font-semibold">{alert.event}</p>
-                                    <p className="text-xs">Area: {alert.area}</p>
-                                    <p className="text-xs">
-                                        Damage Risk: {(alert.adjustedRisk * 100).toFixed(2)}%
-                                    </p>
+                                    <section>
+                                        {hasThreats && (
+                                            <section className="flex flex-wrap gap-1 text-white">
+                                                {tornadoDamageThreat && <p className="text-[0.75rem] backdrop-blur-md bg-red-500/40 border-2 border-red-700 p-0.5 rounded-md font-semibold">{tornadoDamageThreat[0].toUpperCase()}</p>}
+                                                {thunderstormDamageThreat && <p className="text-[0.75rem] backdrop-blur-md bg-yellow-500/40 border-2 border-yellow-700 p-0.5 rounded-md font-semibold">{thunderstormDamageThreat[0].toUpperCase()}</p>}
+                                                {flashFloodDamageThreat && <p className="text-[0.75rem] backdrop-blur-md bg-blue-500/40 border-2 border-blue-700 p-0.5 rounded-md font-semibold">{flashFloodDamageThreat[0].toUpperCase()}</p>}
+                                                {tornadoDetection && <p className="text-[0.75rem] backdrop-blur-md bg-purple-500/40 border-2 border-purple-700 p-0.5 rounded-md font-semibold">{tornadoDetection[0].toUpperCase()}</p>}
+                                                {flashFloodDetection && <p className="text-[0.75rem] backdrop-blur-md bg-purple-500/40 border-2 border-purple-700 p-0.5 rounded-md font-semibold">{flashFloodDetection[0].toUpperCase()}</p>}
+                                            </section>
+                                        )}
+                                        <p className="text-md font-semibold">{alert.event}</p>
+                                        <p className="text-xs">Area: {alert.area}</p>
+                                        { /*
+                                        <p className="text-xs">
+                                            Damage Risk: {(alert.adjustedRisk * 100).toFixed(2)}%
+                                        </p>
+                                        */ }
+                                    </section>
+                                    <section className="flex justify-between">
+                                        <button className="text-xs bg-gray-500/60 p-1 font-bold rounded-md mt-1 text-gray-300 hover:cursor-pointer hover:bg-gray-500" onClick={() => setAlertInfo(alert)}>
+                                            View Details
+                                        </button>
+                                        <p className={'font-bold text-xs p-1 bg-gray-500/60 rounded-md mt-1' + (alert.adjustedRisk > 0.4 ? ' text-red-500' : ' text-gray-300')}>
+                                            {(alert.adjustedRisk * 100).toFixed(2)}%
+                                        </p>
+                                    </section>
                                     {alert['area'].toLowerCase().includes('greenup') && (
                                         <p className="text-xs font-extrabold blink-3">
                                             This alert affects Greenup County!
                                         </p>
                                     )}
-
-                                    {/* Only render this entire block if actual threats exist */}
-                                    {hasThreats && (
-                                        <div className="mt-auto">
-                                            <hr className="my-2 border-gray-400" /> 
-                                            <p className="text-xs font-bold mb-1">Threats and Impacts:</p>
-                                            <div className="text-xs space-y-0.5">
-                                                {maxHailThreat && <p>Hail Threat: {maxHailThreat}</p>}
-                                                {maxHailSize && <p>Max Hail Size: {maxHailSize}in</p>}
-                                                {maxWindGust && <p>Max Wind Gust: {maxWindGust}</p>}
-                                                {tornadoDamageThreat && <p>Tornado Damage Threat: {tornadoDamageThreat}</p>}
-                                                {flashFloodDamageThreat && <p>Flash Flood Damage Threat: {flashFloodDamageThreat}</p>}
-                                                {tornadoDetection && <p>Tornado: {tornadoDetection}</p>}
-                                                {flashFloodDetection && <p>Flash Flood: {flashFloodDetection}</p>}
-                                                {thunderstormDamageThreat && <p>Thunderstorm Threat: {thunderstormDamageThreat}</p>}
-                                            </div>
-                                        </div>
-                                    )}
-                                    
-                                    <a
-                                        className="text-xs underline mt-3"
-                                        href={alert.id}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        View Raw Details
-                                    </a>
                                 </div>
                             );
                         })}
                     </section>
                 </section>
-
+                <section className={`col-span-3 lg:row-span-3 lg:h-full ${settings.theme.card} rounded-lg border-2 p-2 flex flex-col`}>
+                    <h3 className={`text-white text-center text-xl font-extrabold tracking-wide`}>
+                        Alert Details
+                    </h3>
+                    {alertInfo ? (
+                        <section className="flex-1 overflow-y-scroll flex flex-col gap-2 scrollbar-width-0 text-gray-300">
+                            
+                            <p className="font-bold text-lg text-gray-200"> {alertInfo.event}</p>
+                            {alertInfo.parameters && (
+                                <section className="flex flex-wrap gap-1 text-white">
+                                    {alertInfo.parameters?.tornadoDamageThreat && <p className="text-[0.75rem] backdrop-blur-md bg-red-500/40 border-2 border-red-700 p-0.5 rounded-md font-semibold">Damage Threat: {alertInfo.parameters.tornadoDamageThreat[0].toUpperCase()}</p>}
+                                    {alertInfo.parameters?.thunderstormDamageThreat && <p className="text-[0.75rem] backdrop-blur-md bg-yellow-500/40 border-2 border-yellow-700 p-0.5 rounded-md font-semibold">Damage Threat: {alertInfo.parameters.thunderstormDamageThreat[0].toUpperCase()}</p>}
+                                    {alertInfo.parameters?.flashFloodDamageThreat && <p className="text-[0.75rem] backdrop-blur-md bg-blue-500/40 border-2 border-blue-700 p-0.5 rounded-md font-semibold">Damage Threat: {alertInfo.parameters.flashFloodDamageThreat[0].toUpperCase()}</p>}
+                                    {alertInfo.parameters?.tornadoDetection && <p className="text-[0.75rem] backdrop-blur-md bg-purple-500/40 border-2 border-purple-700 p-0.5 rounded-md font-semibold">Tornado: {alertInfo.parameters.tornadoDetection[0].toUpperCase()}</p>}
+                                    {alertInfo.parameters?.flashFloodDetection && <p className="text-[0.75rem] backdrop-blur-md bg-purple-500/40 border-2 border-purple-700 p-0.5 rounded-md font-semibold">Flash Flood: {alertInfo.parameters.flashFloodDetection[0].toUpperCase()}</p>}
+                                    {alertInfo.parameters?.maxHailThreat && <p className="text-[0.75rem] backdrop-blur-md bg-gray-500/40 border-2 border-gray-700 p-0.5 rounded-md font-semibold">Hail Threat: {alertInfo.parameters.maxHailThreat[0].toUpperCase()}</p>}
+                                    {alertInfo.parameters?.maxHailSize && <p className="text-[0.75rem] backdrop-blur-md bg-gray-500/40 border-2 border-gray-700 p-0.5 rounded-md font-semibold">Max Hail Size: {alertInfo.parameters.maxHailSize[0]}in</p>}
+                                    {alertInfo.parameters?.maxWindGust && <p className="text-[0.75rem] backdrop-blur-md bg-gray-500/40 border-2 border-gray-700 p-0.5 rounded-md font-semibold">Max Wind Gust: {alertInfo.parameters.maxWindGust[0]}</p>}
+                                    {alertInfo.area.toLowerCase().includes('greenup') && (
+                                        <p className="text-[0.75rem] backdrop-blur-md bg-green-500/40 border-2 border-green-700 p-0.5 rounded-md font-semibold">
+                                            Affects Greenup County
+                                        </p>
+                                    )}
+                                </section>
+                            )}
+                            <p className="text-sm italic">Issued for: {alertInfo.area}</p>
+                            <p className="text-sm italic">Issued at: {new Date(alertInfo.issued).toLocaleString()}</p>
+                            <p className="text-sm italic">Expires at: {new Date(alertInfo.expires).toLocaleString()} or in {Math.ceil((new Date(alertInfo.expires) - new Date()) / (1000 * 60))} minutes</p>
+                            <hr className="my-2" />
+                            <div className="text-sm leading-relaxed">
+                                {alertInfo.description
+                                    ?.split(/\n\s*\n/) // 1. Split into paragraphs first (double newlines)
+                                    .map((paragraph, index) => (
+                                        <p key={index} className="mb-3">
+                                            {paragraph.replace(/\n/g, " ")} {/* 2. Remove single newlines inside paragraphs */}
+                                        </p>
+                                ))}
+                            </div>
+                        </section>
+                    ) : (
+                        <p className="text-center text-gray-500">Select an alert to view details.</p>
+                    )}
+                </section>
             </section>
             <section className={`tracking-widest text-xl mt-4 border-2 ${settings.theme.pageHeader} rounded-2xl p-2 min-h-0 mb-2`}>
                 <h3 className="text-white text-center">Information Center</h3>
@@ -292,7 +321,7 @@ export default function HomePage() {
                         The Mission
                     </h3>
                     <p className={'font-bold text-xl text-center'}>
-                        Flatwoods Weather is dedicated to providing real-time, local weather risk assessments to help you stay informed and prepared. Our mission is to empower individuals and communities with actionable insights, enabling them to make informed decisions and stay safe during severe weather events.
+                        Greenup County Weather is dedicated to providing real-time, local weather risk assessments to help you stay informed and prepared. Our mission is to empower individuals with actionable insights, enabling them to make informed decisions and stay safe during severe weather events.
                     </p>
                 </section>
                 <section className={`${settings.theme.card} rounded-lg border-2 p-2 flex flex-col col-span-3`}>
@@ -320,15 +349,15 @@ export default function HomePage() {
                     </p>
                     <hr className="mb-4 mt-4" />
                     <ul>
-                        <li className="text-green-700 font-extrabold text-lg">0-29: Normal</li>
+                        <li className="text-green-700 font-extrabold text-lg">0-19: Normal</li>
                         <p>Weather is low in severity, usually consisting of background events.</p>
-                        <li className="text-yellow-500 font-extrabold text-lg">30-59: Minor</li>
+                        <li className="text-yellow-500 font-extrabold text-lg">20-39: Minor</li>
                         <p>Weather is somewhat concerning, with potential for minor impacts.</p>
-                        <li className="text-orange-500 font-extrabold text-lg">60-89: Moderate</li>
+                        <li className="text-orange-500 font-extrabold text-lg">40-59: Moderate</li>
                         <p>Weather is significant, with moderate potential for damaging impacts.</p>
-                        <li className="text-red-500 font-extrabold text-lg">90-119: Severe</li>
+                        <li className="text-red-500 font-extrabold text-lg">60-79: Severe</li>
                         <p>Weather is very serious, with severe potential for significant impacts.</p>
-                        <li className="text-purple-700 font-extrabold text-lg">120+: Extreme</li>
+                        <li className="text-purple-700 font-extrabold text-lg">80+: Extreme</li>
                         <p>Weather is extremely dangerous, with potential for catastrophic impacts.</p>
                     </ul>
                     <hr className="mb-4 mt-4" />
@@ -348,9 +377,9 @@ export default function HomePage() {
                                     </p>
                                     <p className="p-2 text-gray-300">Tornado Warnings have a damage tag associated to them. They indicate the potential for significant damage to structures and life. These are the damage tags:</p>
                                     <ul className="text-gray-400 bg-gray-900/30 p-2 rounded-md">
-                                        <li className="mb-2"><span className="font-bold text-yellow-300">BASE: </span>A normal tornado warning, if a tornado is on the ground it is not causing a lot of destruction. THIS DOES NOT MEAN IT IS SAFE! ALWAYS SHELTER IF A TORNADO WARNING IS ISSUED!</li>
+                                        <li className="mb-2"><span className="font-bold text-yellow-300">BASE: </span>A normal tornado warning, usually lower in intensity. THIS DOES NOT MEAN IT IS SAFE! ALWAYS SHELTER IF A TORNADO WARNING IS ISSUED!</li>
                                         <li className="mb-2"><span className="font-bold text-orange-300">CONSIDERABLE: </span>A tornado is on the ground and poses a significant threat to life and property.</li>
-                                        <li className="mb-2"><span className="font-bold text-red-300">CATASTROPHIC: </span>A violent tornado is on the ground and is expected to cause catastrophic damage and loss of life. These warnings are usually upgraded to a Tornado Emergency.</li>
+                                        <li className="mb-2"><span className="font-bold text-red-300">CATASTROPHIC: </span>A violent tornado is on the ground and is expected to cause catastrophic damage and loss of life. These warnings are also know as a <span className="underline text-purple-400">Tornado Emergency.</span></li>
                                     </ul>
                                     <p className="p-2 text-gray-300">Tornado Warnings also have a SOURCE tag that indicates how the tornado was detected.</p>
                                     <ul className="text-gray-400 bg-gray-900/30 p-2 rounded-md">
@@ -367,7 +396,7 @@ export default function HomePage() {
                                     <p className="text-md p-2 text-gray-300">
                                         A tornado watch is issued when conditions are favorable for the development of tornadoes. It means that there is a potential threat to life and property, and people in the affected area should be prepared to take immediate action if a warning is issued.
                                     </p>
-                                    <p className="p-2">A good way to think of a watch is as such. Inside of a restaurant, there are the various incredients to create a burger, but a burger has not been made. That is a Burger Watch. Once a burger is made, it becomes a Burger Warning.</p>
+                                    <p className="p-2">A good way to think of a watch is as such. Inside of a restaurant, there are the various ingredients to create a burger, but a burger has not been made. That is a Burger Watch. Once a burger is made, it becomes a Burger Warning.</p>
                                 </section>
                             )}
                         </section>
@@ -394,7 +423,7 @@ export default function HomePage() {
                                     <p className="text-md p-2 text-gray-300">
                                         A severe thunderstorm watch is issued when conditions are favorable for the development of severe thunderstorms. It means that there is a potential threat to life and property, and people in the affected area should be prepared to take immediate action if a warning is issued.
                                     </p>
-                                    <p className="p-2">A good way to think of a watch is as such. Inside of a restaurant, there are the various incredients to create a burger, but a burger has not been made. That is a Burger Watch. Once a burger is made, it becomes a Burger Warning.</p>
+                                    <p className="p-2">A good way to think of a watch is as such. Inside of a restaurant, there are the various ingredients to create a burger, but a burger has not been made. That is a Burger Watch. Once a burger is made, it becomes a Burger Warning.</p>
                                 </section>
                             )}
                         </section>
@@ -417,6 +446,7 @@ export default function HomePage() {
                     </section>
                 </section>
             </section>
+            <Footer />
         </section>
     )
 }

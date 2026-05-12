@@ -22,7 +22,7 @@ export default function Sidebar() {
             </div>
             {sidebar && <section className='text-white flex lg:gap-4 gap-2'>
                 <NavLink to='/' className={({ isActive }) =>
-                    `items-center leading-10 flex gap-1 lg:p-1 lg:text-xl lg:m-0 mt-4 mb-4 text-md font-semibold rounded-md ${settings.theme.sidebarPage} hover:border-2 duration-100 hover:border-green-500 ${isActive ? 'border-green-500 bg-gray-700 border-2' : ""}`
+                    `items-center leading-10 flex gap-1 lg:p-1 lg:text-xl lg:m-0 mt-4 mb-4 text-md font-semibold rounded-md ${settings.theme.sidebarPage} hover:border-2 duration-100 hover:border-green-500 ${isActive ? 'border-green-500 bg-gray-700' : ""}`
                 }>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6"><path strokeLinecap="round" strokeLinejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
                 Home
